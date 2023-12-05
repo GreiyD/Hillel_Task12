@@ -40,7 +40,7 @@ else
     echo -e "${On_Green}   This may take a few minutes   ${NC}"
     echo -e "${On_Green}   Wait for completion   ${NC}"
 
-    rsync -avh  --remove-source-files --progress $install_path/$target_path
+    rsync -avh  --remove-source-files --progress $install_path/ $target_path
 
     echo -e "${On_Green}  Delete tmp dir   ${NC}"
     rm -rf $install_path
