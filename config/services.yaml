@@ -22,3 +22,25 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+
+    App\Shortener\Service\UrlConverter:
+        arguments:
+            $numberCharCode: 7
+            $codeSalt: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            $saveToDatabase: true
+
+    App\Shortener\Interfaces\InterfaceUrlDecoder:
+        alias: App\Shortener\Service\UrlConverter
+
+    App\Shortener\Interfaces\InterfaceUrlEncoder:
+        alias: App\Shortener\Service\UrlConverter
+
+    App\Shortener\Interfaces\InterfaceRepository:
+        class: App\Shortener\Repository\UrlConverterRepository
+
+#   App\Shortener\Interfaces\InterfaceRepository:
+#       class: App\Shortener\Repository\FileRepository
+#       arguments:
+#           $fileName: '../file.txt'
+
