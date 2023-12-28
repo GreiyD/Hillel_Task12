@@ -2,10 +2,10 @@
 
 namespace App\Shortener\Repository;
 
-use App\Shortener\Interfaces\InterfaceRepository;
+use App\Shortener\Interfaces\UrlConverter\InterfaceConverterRepository;
 use InvalidArgumentException;
 
-class FileRepository implements InterfaceRepository
+class FileRepository implements InterfaceConverterRepository
 {
     /**
      * @var string
@@ -20,12 +20,14 @@ class FileRepository implements InterfaceRepository
         $this->fileName = $fileName;
     }
 
+
     /**
      * @param string $code
      * @param string $url
+     * @param int $userId
      * @return bool
      */
-    public function saveAll(string $code, string $url): bool
+    public function saveAll(string $code, string $url, int $userId): bool
     {
         $filename = $this->getFileName();
         $data = $code . "  |  " . $url . PHP_EOL;
@@ -47,11 +49,13 @@ class FileRepository implements InterfaceRepository
         return true;
     }
 
+
     /**
      * @param string $code
+     * @param int $userId
      * @return string
      */
-    public function getUrl(string $code): string
+    public function getUrl(string $code, int $userId): string
     {
         $fileName = $this->getFileName();
         $lines = file($fileName, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -69,7 +73,7 @@ class FileRepository implements InterfaceRepository
      * @param string $url
      * @return string
      */
-    public function getCode(string $url): string
+    public function getCode(string $url, int $userId): string
     {
         $fileName = $this->getFileName();
         $lines = file($fileName, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

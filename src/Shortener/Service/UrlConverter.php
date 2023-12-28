@@ -4,11 +4,11 @@ namespace App\Shortener\Service;
 
 use App\Service\UrlConverterRepository;
 use App\Shortener\Helpers\Validation\UrlValidator;
-use App\Shortener\Interfaces\InterfaceUrlDecoder;
-use App\Shortener\Interfaces\InterfaceUrlEncoder;
-use App\Shortener\Repository\FileRepository;
+use App\Shortener\Interfaces\UrlConverter\InterfaceUrlDecoder;
+use App\Shortener\Interfaces\UrlConverter\InterfaceUrlEncoder;
 use Exception;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class UrlConverter implements InterfaceUrlDecoder, InterfaceUrlEncoder
 {
@@ -34,6 +34,11 @@ class UrlConverter implements InterfaceUrlDecoder, InterfaceUrlEncoder
      */
     protected bool $saveToDatabase;
 
+    /**
+     * @var RequestStack
+     */
+    protected RequestStack $requestStack;
+
 
     /**
      * @param UrlValidator $validator
@@ -41,24 +46,27 @@ class UrlConverter implements InterfaceUrlDecoder, InterfaceUrlEncoder
      * @param $numberCharCode
      * @param $codeSalt
      * @param $saveToDatabase
+     * @param RequestStack $requestStack
      */
-    public function __construct(UrlValidator $validator, UrlConverterRepository $databaseRepository, $numberCharCode, $codeSalt, $saveToDatabase)
+    public function __construct(UrlValidator $validator, UrlConverterRepository $databaseRepository, $numberCharCode, $codeSalt, $saveToDatabase, RequestStack $requestStack)
     {
         $this->validator = $validator;
         $this->databaseRepository = $databaseRepository;
         $this->numberCharCode = $numberCharCode;
         $this->codeSalt = $codeSalt;
         $this->saveToDatabase = $saveToDatabase;
+        $this->requestStack = $requestStack;
     }
+
 
     /**
      * @param string $url
      * @return string
+     * @throws Exception
      */
     public function encode(string $url): string
     {
-        $result = $this->prepareUrl($url);
-        return $result;
+        return $this->prepareUrl($url);
     }
 
     /**
@@ -70,15 +78,18 @@ class UrlConverter implements InterfaceUrlDecoder, InterfaceUrlEncoder
         $this->validator->validation($url);
         if (http_response_code() === 200) {
             if ($this->saveToDatabase) {
-                if (!$this->databaseRepository->checkUrlDatabase($url)) {
+
+                $userId = $this->requestStack->getSession()->get('user_data')['user_id'];
+
+                if (!$this->databaseRepository->checkUrlDatabase($url, $userId)) {
                     $code = $this->codingUrl($url);
-                    if ($this->databaseRepository->saveAll($code, $url)) {
+                    if ($this->databaseRepository->saveAll($code, $url, $userId)) {
                         return $code;
                     } else {
                         throw new Exception("Код и URL не были сохранены - ");
                     }
                 } else {
-                    return $this->databaseRepository->getCode($url);
+                    return $this->databaseRepository->getCode($url, $userId);
                 }
             } else {
                 if ($this->fileRepository->checkUrlFile($url)) {
@@ -120,7 +131,8 @@ class UrlConverter implements InterfaceUrlDecoder, InterfaceUrlEncoder
     public function decode(string $code): string
     {
         if ($this->saveToDatabase) {
-            return $this->databaseRepository->getUrl($code);
+            $userId = $this->requestStack->getSession()->get('user_data')['user_id'];
+            return $this->databaseRepository->getUrl($code, $userId);
         } else {
             return $this->fileRepository->getUrl($code);
         }

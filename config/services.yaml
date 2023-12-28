@@ -39,7 +39,7 @@ services:
     App\Shortener\Interfaces\InterfaceRepository:
         class: App\Shortener\Repository\UrlConverterRepository
 
-#   App\Shortener\Interfaces\InterfaceRepository:
+#   App\Shortener\Interfaces\InterfaceConverterRepository:
 #       class: App\Shortener\Repository\FileRepository
 #       arguments:
 #           $fileName: '../file.txt'

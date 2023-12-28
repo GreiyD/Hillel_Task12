@@ -2,7 +2,7 @@
 
 namespace App\Shortener\Helpers\Validation;
 
-use App\Shortener\Interfaces\InterfaceUrlValidator;
+use App\Shortener\Interfaces\UrlConverter\InterfaceUrlValidator;
 
 class UrlValidator implements InterfaceUrlValidator
 {

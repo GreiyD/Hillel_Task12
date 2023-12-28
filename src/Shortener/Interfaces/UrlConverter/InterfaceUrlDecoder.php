@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Shortener\Interfaces;
+namespace App\Shortener\Interfaces\UrlConverter;
 
 interface InterfaceUrlDecoder
 {
